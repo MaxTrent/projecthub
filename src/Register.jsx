@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Link } from 'react-router-dom';
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);

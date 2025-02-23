@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -6,6 +7,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Add this for navigation
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -14,6 +16,8 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Login attempted with:', { email, password });
+    // Simulate successful login; replace with real auth later
+    navigate('/dashboard');
   };
 
   return (

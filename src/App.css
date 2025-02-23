@@ -196,3 +196,165 @@
 .login-link a:hover {
   text-decoration: underline;
 }
+
+/* Add these at the bottom of App.css */
+
+.logout-button {
+  background: none;
+  border: 2px solid #007bff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.logout-button:hover {
+  background-color: #eef5ff;
+}
+
+.welcome-header {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.welcome-header h2 {
+  color: #333333;
+  font-size: 1.5rem;
+}
+
+.dashboard-content {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0 2rem;
+  flex-wrap: wrap;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 250px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card-icon {
+  font-size: 2rem;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  color: #333333;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  font-size: 0.875rem;
+  color: #666666;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .dashboard-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Add these at the bottom of App.css */
+
+.upload-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.upload-card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.input-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.upload-note {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #666666;
+  text-align: center;
+}
+
+.back-link {
+  font-size: 1rem;
+}
+
+.back-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .upload-card {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+}
