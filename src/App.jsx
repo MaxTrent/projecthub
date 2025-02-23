@@ -13,6 +13,7 @@ import SupervisorDashboard from './SupervisorDashboard';
 import SupervisorReview from './SupervisorReview';
 import AdminDashboard from './AdminDashboard';
 import ManageUsers from './ManageUsers';
+import SystemSettings from './SystemSettings';
 
 function App() {
   const handleLogout = () => {
@@ -75,6 +76,11 @@ function App() {
                 <Link to="/admin-dashboard">Back to Dashboard</Link>
               </div>
             } />
+            <Route path="/system-settings" element={
+              <div className="back-link">
+                <Link to="/admin-dashboard">Back to Dashboard</Link>
+              </div>
+            } />
           </Routes>
         </nav>
         <main className="main-content">
@@ -91,6 +97,7 @@ function App() {
             <Route path="/detail" element={<ProjectDetail />} />
             <Route path="/supervisor-review" element={<SupervisorReview />} />
             <Route path="/manage-users" element={<ManageUsers />} />
+            <Route path="/system-settings" element={<SystemSettings />} />
           </Routes>
         </main>
       </div>

@@ -1041,3 +1041,70 @@
     padding: 1.5rem;
   }
 }
+
+/* System Settings Screen */
+.settings-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.settings-card {
+  max-width: 600px;
+}
+
+.settings-card h3 {
+  color: #333333;
+  font-weight: bold;
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.save-settings-button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-settings-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.02);
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .settings-card {
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .settings-card {
+    padding: 2rem;
+  }
+
+  .settings-card h3 {
+    font-size: 1.5rem;
+  }
+}
