@@ -2,12 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function SupervisorDashboard() {
+  // Hardcoded data for demo purposes
   const supervisorName = 'Dr. Alice Carter';
   const projects = [
     { id: 1, title: 'Machine Learning in Healthcare', studentName: 'John Doe', status: 'Under Review' },
     { id: 2, title: 'Web Development Trends', studentName: 'Jane Smith', status: 'Submitted' },
     { id: 3, title: 'AI for Climate Modeling', studentName: 'Alex Brown', status: 'Approved' },
   ];
+
+  const handleReview = (projectId) => {
+    console.log(`Reviewing project with ID: ${projectId}`);
+    // Logic to navigate to a review screen could go here
+  };
 
   return (
     <div className="supervisor-dashboard">
@@ -32,9 +38,12 @@ function SupervisorDashboard() {
                   <td>{project.studentName}</td>
                   <td>{project.status}</td>
                   <td>
-                    <Link to="/supervisor-review" className="review-button">
+                    <button
+                      className="review-button"
+                      onClick={() => handleReview(project.id)}
+                    >
                       Review
-                    </Link>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -46,9 +55,12 @@ function SupervisorDashboard() {
                 <h3>{project.title}</h3>
                 <p><strong>Student:</strong> {project.studentName}</p>
                 <p><strong>Status:</strong> {project.status}</p>
-                <Link to="/supervisor-review" className="review-button">
+                <button
+                  className="review-button"
+                  onClick={() => handleReview(project.id)}
+                >
                   Review
-                </Link>
+                </button>
               </div>
             ))}
           </div>

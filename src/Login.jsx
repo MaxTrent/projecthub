@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -7,7 +7,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Add this for navigation
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -16,8 +16,14 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Login attempted with:', { email, password });
-    // Simulate successful login; replace with real auth later
-    navigate('/dashboard');
+    // Simulate role-based routing
+    if (email.includes('admin')) {
+      navigate('/admin-dashboard');
+    } else if (email.includes('supervisor')) {
+      navigate('/supervisor-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
@@ -30,6 +36,8 @@ function Login() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            aria-label="Email"
             required
           />
         </div>
@@ -41,6 +49,8 @@ function Login() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              aria-label="Password"
               required
             />
             <span className="visibility-toggle" onClick={togglePasswordVisibility}>
