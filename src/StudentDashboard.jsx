@@ -1,61 +1,49 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import SearchIcon from '@mui/icons-material/Search';
 
-function SupervisorDashboard() {
-  const supervisorName = 'Dr. Alice Carter';
-  const projects = [
-    { id: 1, title: 'Machine Learning in Healthcare', studentName: 'John Doe', status: 'Under Review' },
-    { id: 2, title: 'Web Development Trends', studentName: 'Jane Smith', status: 'Submitted' },
-    { id: 3, title: 'AI for Climate Modeling', studentName: 'Alex Brown', status: 'Approved' },
-  ];
+function StudentDashboard() {
+  const studentName = 'John Doe';
 
   return (
-    <div className="supervisor-dashboard">
+    <div className="dashboard">
       <header className="welcome-header">
-        <h2>Welcome, {supervisorName}</h2>
+        <h2>Welcome, {studentName}</h2>
       </header>
-      <main className="supervisor-content">
-        <div className="table-container">
-          <table className="supervisor-table">
-            <thead>
-              <tr>
-                <th>Project Title</th>
-                <th>Student Name</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(project => (
-                <tr key={project.id}>
-                  <td>{project.title}</td>
-                  <td>{project.studentName}</td>
-                  <td>{project.status}</td>
-                  <td>
-                    <Link to="/supervisor-review" className="review-button">
-                      Review
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="mobile-cards">
-            {projects.map(project => (
-              <div key={project.id} className="mobile-card">
-                <h3>{project.title}</h3>
-                <p><strong>Student:</strong> {project.studentName}</p>
-                <p><strong>Status:</strong> {project.status}</p>
-                <Link to="/supervisor-review" className="review-button">
-                  Review
-                </Link>
-              </div>
-            ))}
+      <main className="dashboard-content">
+        <Link to="/upload" className="card-link">
+          <div className="card">
+            <CloudUploadIcon className="card-icon" />
+            <h3>Upload Project</h3>
+            <p>Submit your final year project</p>
           </div>
-        </div>
+        </Link>
+        <Link to="/status" className="card-link">
+          <div className="card">
+            <TrackChangesIcon className="card-icon" />
+            <h3>Track Project Status</h3>
+            <p>Monitor your project’s progress</p>
+          </div>
+        </Link>
+        <Link to="/search" className="card-link">
+          <div className="card">
+            <SearchIcon className="card-icon" />
+            <h3>Search Past Projects</h3>
+            <p>Explore previous submissions</p>
+          </div>
+        </Link>
+        <Link to="/feedback" className="card-link">
+          <div className="card">
+            <TrackChangesIcon className="card-icon" />
+            <h3>View Feedback</h3>
+            <p>See supervisor comments</p>
+          </div>
+        </Link>
       </main>
     </div>
   );
 }
 
-export default SupervisorDashboard;
+export default StudentDashboard;
