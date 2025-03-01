@@ -1,16 +1,58 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import SearchIcon from '@mui/icons-material/Search';
 
 function StudentDashboard() {
-  const studentName = 'John Doe';
+  const [studentName, setStudentName] = useState('');
+  const [projectId, setProjectId] = useState(null); // Store projectId
+  const navigate = useNavigate();
+  const location = useLocation(); // Get navigation state
+
+  useEffect(() => {
+    const fetchStudentName = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token found, redirecting to login');
+        navigate('/');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/currentUser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setStudentName(data.fullName);
+        } else {
+          console.log('Failed to fetch user data:', data.error || 'Unknown error');
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        navigate('/');
+      }
+    };
+
+    fetchStudentName();
+
+    // Check if projectId came from navigation state
+    if (location.state?.projectId) {
+      setProjectId(location.state.projectId);
+      console.log('Project ID from upload:', location.state.projectId);
+    }
+  }, [navigate, location]);
 
   return (
     <div className="dashboard">
       <header className="welcome-header">
-        <h2>Welcome, {studentName}</h2>
+        <h2>Welcome, {studentName || 'Loading...'}</h2>
       </header>
       <main className="dashboard-content">
         <Link to="/upload" className="card-link">
@@ -20,7 +62,7 @@ function StudentDashboard() {
             <p>Submit your final year project</p>
           </div>
         </Link>
-        <Link to="/status" className="card-link">
+        <Link to={projectId ? `/status/${projectId}` : '/dashboard'} className="card-link">
           <div className="card">
             <TrackChangesIcon className="card-icon" />
             <h3>Track Project Status</h3>

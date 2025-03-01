@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function ProjectUpload() {
   const [projectTitle, setProjectTitle] = useState('');
   const [abstract, setAbstract] = useState('');
   const [keywords, setKeywords] = useState('');
   const [file, setFile] = useState(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -16,24 +17,56 @@ function ProjectUpload() {
         setFile(selectedFile);
       } else {
         alert('Please upload a PDF or Word file under 50MB.');
-        e.target.value = null; // Reset the input
+        e.target.value = null;
       }
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
       alert('Please upload a document.');
       return;
     }
-    console.log('Project submitted:', { projectTitle, abstract, keywords, file });
-    // Reset form after submission (optional)
-    setProjectTitle('');
-    setAbstract('');
-    setKeywords('');
-    setFile(null);
-    e.target.reset(); // Reset file input
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('No token found, redirecting to login');
+      navigate('/');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', projectTitle);
+    formData.append('abstract', abstract);
+    formData.append('keywords', keywords);
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/projects/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Project submitted successfully:', data);
+        setProjectTitle('');
+        setAbstract('');
+        setKeywords('');
+        setFile(null);
+        e.target.reset();
+        // Redirect to dashboard with projectId in state
+        navigate('/dashboard', { state: { projectId: data.projectId } });
+      } else {
+        console.log('Project upload failed:', data.error || 'Unknown error');
+      }
+    } catch (err) {
+      console.error('Error uploading project:', err);
+    }
   };
 
   return (

@@ -13,16 +13,30 @@ function Login() {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempted with:', { email, password });
-    // Simulate role-based routing
-    if (email.includes('admin')) {
-      navigate('/admin-dashboard');
-    } else if (email.includes('supervisor')) {
-      navigate('/supervisor-dashboard');
-    } else {
-      navigate('/dashboard');
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token); // Store token
+        // Navigate based on role from API response
+        if (data.role === 'Administrator') {
+          navigate('/admin-dashboard');
+        } else if (data.role === 'Supervisor') {
+          navigate('/supervisor-dashboard');
+        } else {
+          navigate('/dashboard'); // Default to student dashboard
+        }
+      } else {
+        console.log('Login failed:', data.message || 'Unknown error');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
     }
   };
 

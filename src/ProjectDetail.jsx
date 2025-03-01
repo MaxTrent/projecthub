@@ -13,7 +13,6 @@ function ProjectDetail() {
 
   const handleDownload = () => {
     console.log('Download project document initiated');
-    // Logic to download the file would go here (e.g., fetch from backend)
   };
 
   return (
