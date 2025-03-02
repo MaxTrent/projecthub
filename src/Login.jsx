@@ -22,18 +22,20 @@ function Login() {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
+      console.log('Login response:', data); // Debug role
       if (response.ok) {
         localStorage.setItem('token', data.token); // Store token
-        // Navigate based on role from API response
-        if (data.role === 'Administrator') {
+        // Navigate based on role from API response (case-insensitive)
+        const role = data.role.toLowerCase();
+        if (role === 'administrator') {
           navigate('/admin-dashboard');
-        } else if (data.role === 'Supervisor') {
+        } else if (role === 'supervisor') {
           navigate('/supervisor-dashboard');
         } else {
           navigate('/dashboard'); // Default to student dashboard
         }
       } else {
-        console.log('Login failed:', data.message || 'Unknown error');
+        console.log('Login failed:', data.error || 'Unknown error');
       }
     } catch (err) {
       console.error('Login error:', err);

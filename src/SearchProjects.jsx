@@ -3,21 +3,37 @@ import { Link } from 'react-router-dom';
 
 function SearchProjects() {
   const [searchQuery, setSearchQuery] = useState('');
-  const demoProjects = [
-    { id: 1, title: 'Machine Learning in Healthcare', author: 'John Doe', year: '2024' },
-    { id: 2, title: 'Web Development Trends', author: 'Jane Smith', year: '2023' },
-    { id: 3, title: 'AI for Climate Modeling', author: 'Alex Brown', year: '2024' },
-  ];
+  const [searchResults, setSearchResults] = useState([]);
 
-  const [searchResults, setSearchResults] = useState(demoProjects);
-
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    const filtered = demoProjects.filter(project =>
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.author.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setSearchResults(filtered);
+    if (!searchQuery.trim()) {
+      console.log('Search query is empty');
+      setSearchResults([]);
+      return;
+    }
+
+    console.log('Sending search request with keyword:', searchQuery);
+    try {
+      const response = await fetch(`http://localhost:3000/api/projects/search?keyword=${encodeURIComponent(searchQuery)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      console.log('Raw response status:', response.status, 'Data:', data);
+      if (response.ok) {
+        console.log('Search results received:', data);
+        setSearchResults(data);
+      } else {
+        console.log('Search failed:', data.error || 'Unknown error');
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.error('Error during search:', err);
+      setSearchResults([]);
+    }
   };
 
   return (
@@ -36,11 +52,11 @@ function SearchProjects() {
         <div className="results-list">
           {searchResults.length > 0 ? (
             searchResults.map(project => (
-              <div key={project.id} className="result-card">
-                <h3>{project.title}</h3>
-                <p>Author: {project.author}</p>
-                <p>Year: {project.year}</p>
-                <Link to="/detail" className="view-details-button">View Details</Link>
+              <div key={project.projectId} className="result-card">
+                <h3>{project.title || 'No Title'}</h3>
+                <p>Author: {project.author || 'Unknown'}</p>
+                <p>Year: {project.year || 'N/A'}</p>
+                <Link to={`/detail/${project.projectId}`} className="view-details-button">View Details</Link>
               </div>
             ))
           ) : (

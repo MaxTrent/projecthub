@@ -8,7 +8,7 @@ function StudentDashboard() {
   const [studentName, setStudentName] = useState('');
   const [projectId, setProjectId] = useState(null); // Store projectId
   const navigate = useNavigate();
-  const location = useLocation(); // Get navigation state
+  const location = useLocation();
 
   useEffect(() => {
     const fetchStudentName = async () => {
