@@ -20,6 +20,7 @@ import SupervisorReview from "./SupervisorReview";
 import AdminDashboard from "./AdminDashboard";
 import ManageUsers from "./ManageUsers";
 import SystemSettings from "./SystemSettings";
+import AssignSupervisor from './AssignSupervisor';
 
 // Inner component to use Router hooks
 function AppContent() {
@@ -106,7 +107,10 @@ function AppContent() {
               </div>
             }
           />
+
+<Route path="/assign-supervisor" element={<div className="back-link"><Link to="/admin-dashboard">Back to Dashboard</Link></div>} />
         </Routes>
+        
       </nav>
       <main className="main-content">
         <Routes>
@@ -120,12 +124,13 @@ function AppContent() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/upload" element={<ProjectUpload />} />
           <Route path="/status/:projectId" element={<ProjectStatus />} />
-          <Route path="/feedback" element={<SupervisorFeedback />} />
+          <Route path="/feedback/:projectId" element={<SupervisorFeedback />} />
           <Route path="/search" element={<SearchProjects />} />
           <Route path="/detail/:projectId" element={<ProjectDetail />} />
           <Route path="/supervisor-review" element={<SupervisorReview />} />
           <Route path="/manage-users" element={<ManageUsers />} />
           <Route path="/system-settings" element={<SystemSettings />} />
+          <Route path="/assign-supervisor" element={<AssignSupervisor />} />
         </Routes>
       </main>
     </div>

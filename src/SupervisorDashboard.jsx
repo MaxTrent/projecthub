@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 function SupervisorDashboard() {
   const [supervisorName, setSupervisorName] = useState('');
   const [projects, setProjects] = useState([]);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +17,7 @@ function SupervisorDashboard() {
       }
 
       try {
-        // Fetch supervisor name from /currentUser
+        // Fetch supervisor name
         const userResponse = await fetch('http://localhost:3000/api/auth/currentUser', {
           method: 'GET',
           headers: {
@@ -24,33 +25,31 @@ function SupervisorDashboard() {
             'Authorization': `Bearer ${token}`,
           },
         });
-        const userData = await userResponse.json();
-        if (userResponse.ok) {
-          setSupervisorName(userData.fullName);
-        } else {
-          console.log('Failed to fetch user data:', userData.error);
-          navigate('/');
-          return;
+        if (!userResponse.ok) {
+          const text = await userResponse.text();
+          throw new Error(`User fetch failed - Status: ${userResponse.status}, Response: ${text}`);
         }
+        const userData = await userResponse.json();
+        setSupervisorName(userData.fullName);
 
-        // Fetch projects from /search without keyword for supervisor-specific list
-        const projectsResponse = await fetch('http://localhost:3000/api/projects/search', {
+        // Fetch projects
+        const projectsResponse = await fetch('http://localhost:3000/api/projects/supervisor/projects', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         });
-        const projectsData = await projectsResponse.json();
-        if (projectsResponse.ok) {
-          console.log('Projects data received:', projectsData);
-          setProjects(projectsData);
-        } else {
-          console.log('Failed to fetch projects:', projectsData.error);
-          setProjects([]);
+        if (!projectsResponse.ok) {
+          const text = await projectsResponse.text();
+          throw new Error(`Projects fetch failed - Status: ${projectsResponse.status}, Response: ${text}`);
         }
+        const projectsData = await projectsResponse.json();
+        console.log('Projects data received:', projectsData);
+        setProjects(projectsData.projects);
       } catch (err) {
         console.error('Error fetching supervisor data:', err);
+        setError(err.message);
         navigate('/');
       }
     };
@@ -60,7 +59,17 @@ function SupervisorDashboard() {
 
   const handleReview = (projectId) => {
     console.log(`Reviewing project with ID: ${projectId}`);
-    navigate(`/supervisor-review/${projectId}`);
+    navigate(`/feedback/${projectId}`); // Changed to /feedback/:projectId
+  };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'draft': return { color: 'gray' };
+      case 'submitted': return { color: 'blue' };
+      case 'under_review': return { color: 'orange' };
+      case 'approved': return { color: 'green' };
+      default: return {};
+    }
   };
 
   return (
@@ -69,6 +78,7 @@ function SupervisorDashboard() {
         <h2>Welcome, {supervisorName || 'Loading...'}</h2>
       </header>
       <main className="supervisor-content">
+        {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
         <div className="table-container">
           <table className="supervisor-table">
             <thead>
@@ -85,7 +95,7 @@ function SupervisorDashboard() {
                   <tr key={project.id}>
                     <td>{project.title}</td>
                     <td>{project.studentName}</td>
-                    <td>{project.status}</td>
+                    <td style={getStatusStyle(project.status)}>{project.status}</td>
                     <td>
                       <button
                         className="review-button"
@@ -109,7 +119,7 @@ function SupervisorDashboard() {
                 <div key={project.id} className="mobile-card">
                   <h3>{project.title}</h3>
                   <p><strong>Student:</strong> {project.studentName}</p>
-                  <p><strong>Status:</strong> {project.status}</p>
+                  <p><strong>Status:</strong> <span style={getStatusStyle(project.status)}>{project.status}</span></p>
                   <button
                     className="review-button"
                     onClick={() => handleReview(project.id)}

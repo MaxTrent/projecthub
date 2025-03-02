@@ -1,3 +1,7 @@
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
@@ -66,7 +70,6 @@ function ProjectDetail() {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        // Extract filename from Content-Disposition or default
         const contentDisposition = response.headers.get('Content-Disposition');
         const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || `project-${projectId}.pdf`;
         link.download = filename;

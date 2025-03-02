@@ -2,18 +2,23 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(''); // For success/error feedback
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const onSubmit = async (data) => {
+    setMessage(''); // Clear previous messages
+    setLoading(true);
+
     try {
       const response = await fetch('http://localhost:3000/api/auth/register', {
         method: 'POST',
@@ -26,25 +31,34 @@ function Register() {
         }),
       });
       const result = await response.json();
+      console.log('Register response:', result);
       if (response.ok) {
-        localStorage.setItem('token', result.token); // Store token
-        // Navigate based on role from API response
-        if (result.role === 'administrator') {
-          navigate('/admin-dashboard');
-        } else if (result.role === 'supervisor') {
-          navigate('/supervisor-dashboard');
-        } else {
-          navigate('/dashboard'); // Default to student dashboard
-        }
+        localStorage.setItem('token', result.token);
+        setMessage('Registration successful! Redirecting...');
+        const role = result.role.toLowerCase();
+        setTimeout(() => {
+          if (role === 'admin') {
+            navigate('/admin-dashboard');
+          } else if (role === 'supervisor') {
+            navigate('/supervisor-dashboard');
+          } else if (role === 'student') {
+            navigate('/dashboard');
+          } else {
+            console.log('Unknown role:', role);
+            navigate('/');
+          }
+        }, 1000); // 1-second delay for feedback visibility
       } else {
-        console.log('Registration failed:', result.message || 'Unknown error');
+        setMessage(result.error || 'Registration failed. Please check your details.');
       }
     } catch (err) {
       console.error('Registration error:', err);
+      setMessage('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Watch the password field to compare with confirm password
   const password = watch('password', '');
 
   return (
@@ -102,30 +116,36 @@ function Register() {
               id="confirmPassword"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',
-                validate: (value) =>
-                  value === password || 'Passwords do not match',
+                validate: (value) => value === password || 'Passwords do not match',
               })}
             />
             <span className="visibility-toggle" onClick={togglePasswordVisibility}>
               {showPassword ? <VisibilityOff /> : <Visibility />}
             </span>
           </div>
-          {errors.confirmPassword && (
-            <p className="error-message">{errors.confirmPassword.message}</p>
-          )}
+          {errors.confirmPassword && <p className="error-message">{errors.confirmPassword.message}</p>}
         </div>
         <div className="input-group">
           <label htmlFor="role">Role</label>
           <select id="role" {...register('role', { required: 'Role is required' })}>
-            <option value="Student">Student</option>
-            <option value="Supervisor">Supervisor</option>
-            <option value="Administrator">Administrator</option>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="admin">Administrator</option>
           </select>
           {errors.role && <p className="error-message">{errors.role.message}</p>}
         </div>
-        <button type="submit" className="register-button">
-          Register
+        <button type="submit" className="register-button" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
         </button>
+        {message && (
+          <p
+            className="message-text"
+            style={{ color: message.includes('successful') ? 'green' : 'red', marginTop: '10px', textAlign: 'center' }}
+          >
+            {message}
+          </p>
+        )}
         <div className="login-link">
           <Link to="/">Already have an account? Login</Link>
         </div>

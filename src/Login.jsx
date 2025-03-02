@@ -7,6 +7,8 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(''); // For success/error feedback
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -15,6 +17,9 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear previous messages
+    setLoading(true);
+
     try {
       const response = await fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
@@ -22,23 +27,31 @@ function Login() {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-      console.log('Login response:', data); // Debug role
+      console.log('Login response:', data);
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Store token
-        // Navigate based on role from API response (case-insensitive)
+        localStorage.setItem('token', data.token);
+        setMessage('Login successful! Redirecting...');
         const role = data.role.toLowerCase();
-        if (role === 'administrator') {
-          navigate('/admin-dashboard');
-        } else if (role === 'supervisor') {
-          navigate('/supervisor-dashboard');
-        } else {
-          navigate('/dashboard'); // Default to student dashboard
-        }
+        setTimeout(() => {
+          if (role === 'admin') {
+            navigate('/admin-dashboard');
+          } else if (role === 'supervisor') {
+            navigate('/supervisor-dashboard');
+          } else if (role === 'student') {
+            navigate('/dashboard');
+          } else {
+            console.log('Unknown role:', role);
+            navigate('/');
+          }
+        }, 1000); // 1-second delay for feedback visibility
       } else {
-        console.log('Login failed:', data.error || 'Unknown error');
+        setMessage(data.error || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       console.error('Login error:', err);
+      setMessage('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,9 +87,17 @@ function Login() {
             </span>
           </div>
         </div>
-        <button type="submit" className="login-button">
-          Login
+        <button type="submit" className="login-button" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
         </button>
+        {message && (
+          <p
+            className="message-text"
+            style={{ color: message.includes('successful') ? 'green' : 'red', marginTop: '10px', textAlign: 'center' }}
+          >
+            {message}
+          </p>
+        )}
         <div className="forgot-password">
           <a href="#forgot">Forgot Password?</a>
         </div>

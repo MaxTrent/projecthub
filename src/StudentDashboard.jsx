@@ -1,53 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
+import { Link, useNavigate } from 'react-router-dom';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import SearchIcon from '@mui/icons-material/Search';
 
 function StudentDashboard() {
   const [studentName, setStudentName] = useState('');
-  const [projectId, setProjectId] = useState(null); // Store projectId
+  const [project, setProject] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    const fetchStudentName = async () => {
+    const fetchStudentData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
         console.log('No token found, redirecting to login');
         navigate('/');
         return;
       }
+      console.log('Fetching with token:', token);
+      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT
+      console.log('Token role:', decodedToken.role);
+
+      // Role check
+      if (decodedToken.role !== 'student') {
+        console.log('User is not a student, redirecting based on role');
+        if (decodedToken.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else if (decodedToken.role === 'supervisor') {
+          navigate('/supervisor-dashboard');
+        } else {
+          navigate('/');
+        }
+        return;
+      }
 
       try {
-        const response = await fetch('http://localhost:3000/api/auth/currentUser', {
+        const userResponse = await fetch('http://localhost:3000/api/auth/currentUser', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         });
-        const data = await response.json();
-        if (response.ok) {
-          setStudentName(data.fullName);
-        } else {
-          console.log('Failed to fetch user data:', data.error || 'Unknown error');
+        if (!userResponse.ok) {
+          const text = await userResponse.text();
+          console.log('User fetch failed - Status:', userResponse.status, 'Response:', text);
           navigate('/');
+          return;
         }
+        const userData = await userResponse.json();
+        console.log('User data:', userData);
+        setStudentName(userData.fullName);
+
+        const projectResponse = await fetch('http://localhost:3000/api/projects/student/project', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!projectResponse.ok) {
+          const text = await projectResponse.text();
+          console.log('Project fetch failed - Status:', projectResponse.status, 'Response:', text);
+          navigate('/');
+          return;
+        }
+        const projectData = await projectResponse.json();
+        console.log('Project data received:', projectData);
+        setProject(projectData);
       } catch (err) {
-        console.error('Error fetching user data:', err);
+        console.error('Error fetching student data:', err);
         navigate('/');
       }
     };
 
-    fetchStudentName();
+    fetchStudentData();
+  }, [navigate]);
 
-    // Check if projectId came from navigation state
-    if (location.state?.projectId) {
-      setProjectId(location.state.projectId);
-      console.log('Project ID from upload:', location.state.projectId);
+  const handleReview = () => {
+    if (project) {
+      navigate(`/feedback/${project.projectId}`);
     }
-  }, [navigate, location]);
+  };
 
   return (
     <div className="dashboard">
@@ -58,17 +92,17 @@ function StudentDashboard() {
         <Link to="/upload" className="card-link">
           <div className="card">
             <CloudUploadIcon className="card-icon" />
-            <h3>Upload Project</h3>
-            <p>Submit your final year project</p>
+            <h3>{project ? 'Manage Project' : 'Upload Project'}</h3>
+            <p>{project ? 'Update your project submission' : 'Submit your final year project'}</p>
           </div>
         </Link>
-        <Link to={projectId ? `/status/${projectId}` : '/dashboard'} className="card-link">
+        <div className="card-link" onClick={() => project && navigate(`/status/${project.projectId}`)}>
           <div className="card">
             <TrackChangesIcon className="card-icon" />
             <h3>Track Project Status</h3>
             <p>Monitor your project’s progress</p>
           </div>
-        </Link>
+        </div>
         <Link to="/search" className="card-link">
           <div className="card">
             <SearchIcon className="card-icon" />
@@ -76,13 +110,13 @@ function StudentDashboard() {
             <p>Explore previous submissions</p>
           </div>
         </Link>
-        <Link to="/feedback" className="card-link">
+        <div className="card-link" onClick={handleReview}>
           <div className="card">
             <TrackChangesIcon className="card-icon" />
             <h3>View Feedback</h3>
             <p>See supervisor comments</p>
           </div>
-        </Link>
+        </div>
       </main>
     </div>
   );

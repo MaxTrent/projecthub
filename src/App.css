@@ -1126,3 +1126,71 @@
     font-size: 1.5rem;
   }
 }
+
+
+.assign-supervisor-page {
+  padding: 20px;
+}
+
+.assign-supervisor-content {
+  display: flex;
+  justify-content: center;
+}
+
+.assign-supervisor-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+.assign-supervisor-card h2 {
+  margin-bottom: 20px;
+}
+
+.assign-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.add-user-form, .edit-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.add-user-form input, .edit-user-form input,
+.add-user-form select, .edit-user-form select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-user-form button, .edit-user-form button {
+  padding: 8px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-user-form button[type="button"], .edit-user-form button[type="button"] {
+  background-color: #f44336;
+}
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function ProjectUpload() {
@@ -6,17 +6,89 @@ function ProjectUpload() {
   const [abstract, setAbstract] = useState('');
   const [keywords, setKeywords] = useState('');
   const [file, setFile] = useState(null);
+  const [project, setProject] = useState(null);
+  const [message, setMessage] = useState('');
+  const [maxFileSize, setMaxFileSize] = useState(50); //Default 50mb
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token found, redirecting to login');
+        navigate('/');
+        return;
+      }
+
+      try {
+        // Fetch settings
+        const settingsResponse = await fetch('http://localhost:3000/api/admin/settings', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!settingsResponse.ok) {
+          const text = await settingsResponse.text();
+          console.log('Settings fetch failed - Status:', settingsResponse.status, 'Response:', text);
+          // Use default 50MB if fetch fails
+        } else {
+          const settingsData = await settingsResponse.json();
+          setMaxFileSize(settingsData.maxFileSize);
+        }
+
+        // Fetch project
+        const projectResponse = await fetch('http://localhost:3000/api/projects/student/project', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!projectResponse.ok) {
+          const text = await projectResponse.text();
+          console.log('Project fetch failed - Status:', projectResponse.status, 'Response:', text);
+          return;
+        }
+        const data = await projectResponse.json();
+        console.log('Project data:', data);
+        setProject(data);
+        if (data) {
+          const projectDetailsResponse = await fetch(`http://localhost:3000/api/projects/${data.projectId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const projectData = await projectDetailsResponse.json();
+          if (projectDetailsResponse.ok) {
+            setProjectTitle(projectData.title);
+            setAbstract(projectData.abstract);
+            setKeywords(projectData.keywords);
+            setMessage('You have an existing project. Update details and/or file as needed.');
+          }
+        } else {
+          setMessage('No project submitted yet. Please fill in all fields to submit.');
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
-      if (allowedTypes.includes(selectedFile.type) && selectedFile.size <= maxSize) {
+      const maxSizeBytes = maxFileSize * 1024 * 1024; // Convert MB to bytes
+      if (allowedTypes.includes(selectedFile.type) && selectedFile.size <= maxSizeBytes) {
         setFile(selectedFile);
       } else {
-        alert('Please upload a PDF or Word file under 50MB.');
+        alert(`Please upload a PDF or Word file under ${maxFileSize}MB.`);
         e.target.value = null;
       }
     }
@@ -24,8 +96,12 @@ function ProjectUpload() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) {
-      alert('Please upload a document.');
+    if (!projectTitle || !abstract || !keywords) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    if (!file && !project) {
+      alert('Please upload a file for your initial submission.');
       return;
     }
 
@@ -40,11 +116,13 @@ function ProjectUpload() {
     formData.append('title', projectTitle);
     formData.append('abstract', abstract);
     formData.append('keywords', keywords);
-    formData.append('file', file);
+    if (file) formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:3000/api/projects/upload', {
-        method: 'POST',
+      const url = project ? `http://localhost:3000/api/projects/upload/${project.projectId}` : 'http://localhost:3000/api/projects/upload';
+      const method = project ? 'PUT' : 'POST';
+      const response = await fetch(url, {
+        method,
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -53,19 +131,18 @@ function ProjectUpload() {
 
       const data = await response.json();
       if (response.ok) {
-        console.log('Project submitted successfully:', data);
-        setProjectTitle('');
-        setAbstract('');
-        setKeywords('');
+        console.log(project ? 'Resubmit successful:' : 'Upload successful:', data);
+        setProject({ projectId: data.projectId, title: projectTitle, status: project ? 'submitted' : 'draft' });
         setFile(null);
-        e.target.reset();
-        // Redirect to dashboard with projectId in state
-        navigate('/dashboard', { state: { projectId: data.projectId } });
+        setMessage(project ? 'Project resubmitted successfully!' : 'Project submitted successfully!');
+        navigate('/dashboard');
       } else {
-        console.log('Project upload failed:', data.error || 'Unknown error');
+        console.log(project ? 'Resubmit failed:' : 'Upload failed:', data.error);
+        setMessage(`Submission failed: ${data.error || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error('Error uploading project:', err);
+      console.error('Error during submission:', err);
+      setMessage('Error during submission.');
     }
   };
 
@@ -112,13 +189,18 @@ function ProjectUpload() {
                 id="document"
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileChange}
-                required
+                required={!project}
               />
             </div>
             <button type="submit" className="submit-button">
-              Submit
+              {project ? 'Resubmit Project' : 'Submit Project'}
             </button>
-            <p className="upload-note">Supported formats: PDF, Word. Max size: 50MB.</p>
+            <p className="upload-note">Supported formats: PDF, Word. Max size: {maxFileSize}MB.</p>
+            {message && (
+              <p style={{ color: message.includes('successfully') ? 'green' : 'red' }}>
+                {message}
+              </p>
+            )}
           </form>
         </div>
       </main>
